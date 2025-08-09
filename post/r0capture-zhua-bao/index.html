@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>r0capture抓app数据包 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="在渗透测试中总有APP的数据包是无法被抓取的，但frida与r0capture进行配合可以对那些无法抓取的数据包进行抓取
+首先先了解一下frida跟r0capture 是什么东西
+Firda 是一款易用的跨平 Hook 工具， Java 层..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">r0capture抓app数据包</h2>
+            <div class="post-date">2023-06-23</div>
+            
+            <div class="post-content" v-pre>
+              <p>在渗透测试中总有APP的数据包是无法被抓取的，但frida与r0capture进行配合可以对那些无法抓取的数据包进行抓取</p>
+<p>首先先了解一下frida跟r0capture 是什么东西</p>
+<p>Firda 是一款易用的跨平 Hook 工具， Java 层到 Native 层的 Hook 无所不能，是一种 动态 的插桩工具，可以插入代码到原生 App 的内存空间中，动态的去监视和修改行为，原生平台包括 Win、Mac、Linux、Android、iOS 全平台。</p>
+<p>r0capture无视所有证书校验或绑定，不用考虑任何证书的事情；</p>
+<p>通杀TCP/IP四层模型中的应用层中的全部协议；</p>
+<p>通杀协议包括：Http,WebSocket,Ftp,Xmpp,Imap,Smtp,Protobuf等、及它们的SSL版本；</p>
+<p>通杀所有应用层框架，包括HttpUrlConnection、Okhttp1/3/4、Retrofit/Volley等等；</p>
+<p>无视加固，不管是整体壳还是二代壳或VMP，不用考虑加固的事情</p>
+<p>先附上两个工具的下载地址</p>
+<p>frida:Releases · frida/frida · GitHub</p>
+<p>r0capture：GitHub - r0ysue/r0capture: 安卓应用层抓包通杀脚本</p>
+<p>接下来以我本地的电脑为例，教大家如何安装，模拟器为夜神模拟器；</p>
+<p>首先要确保本地安装了frida的包</p>
+<p>可通过frida --version 查看<br>
+<img src="https://mezdosec.github.io/post-images/1687491708998.png" alt="" loading="lazy"></p>
+<p>如果没有安装的话，可以执行以下命令进行安装（前提是电脑安装了python环境，这里建议使用python3.8、python3.9），不建议一上来直接使用最新版本的python，可能会有很多库模块进行更新，导致frida无法正常使用。</p>
+<p>安装命令如下<br>
+<code>pip install frida</code><br>
+<code>pip install frida-tools</code></p>
+<p>这里模拟器是要装服务端我的是安卓，所以选的是安卓的，这里对应上我的电脑版本<br>
+<img src="https://mezdosec.github.io/post-images/1687492091299.png" alt="" loading="lazy"><br>
+下载好之后解压到模拟器的bin目录下，（其他目录也可以，因为frida-server服务端需要使用adb shell上传到安卓目录下），而夜神模拟器自带了adb环境</p>
+<p>下载好之后解压到模拟器的bin目录下<br>
+<img src="https://mezdosec.github.io/post-images/1687492359537.png" alt="" loading="lazy"></p>
+<p>接着到夜神模拟器的bin文件目录下  cmd打开命令提示器<br>
+执行adb.exe  devices 查看模拟器是否有连接<br>
+<img src="https://mezdosec.github.io/post-images/1687492466448.png" alt="" loading="lazy"><br>
+(这里如若没有出现连接，可自行重新模拟器。)</p>
+<p>接着通过命令，使用adb shell把下载好的frida-server 导入到模拟器/data/local/tmp目录中<br>
+<code>adb.exe push frida-server-15.1.24-android-x86 /data/local/tmp/</code><br>
+<img src="https://mezdosec.github.io/post-images/1687492623421.png" alt="" loading="lazy"><br>
+拷贝进去后， 再执行adb.exe shell 进行连接到模拟器<br>
+<img src="https://mezdosec.github.io/post-images/1687492719337.png" alt="" loading="lazy"><br>
+修改我们上传进去frida文件的读写权限： chmod 777 frida文件名<br>
+<img src="https://mezdosec.github.io/post-images/1687492880255.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687492990223.png" alt="" loading="lazy"><br>
+启动 frida服务端<br>
+<img src="https://mezdosec.github.io/post-images/1687572247737.png" alt="" loading="lazy">·<br>
+接着到本机的bin目录下在开启一个cmd  可通过<br>
+<code>frida -ps -U </code><br>
+<code>frida -ps -R </code><br>
+来进行检测是否建立了连接，正常情况来讲是可以看到模拟器的进程</p>
+<p><img src="https://mezdosec.github.io/post-images/1687493205937.png" alt="" loading="lazy"><br>
+frida-ps -R  这条命令如果不成功 ，说明没有进行端口转发操作。<br>
+<img src="https://mezdosec.github.io/post-images/1687493385265.png" alt="" loading="lazy"><br>
+可以输入命令<br>
+<code>adb forward tcp:27042  tcp:27042</code><br>
+<code>adb forward tcp:27043  tcp:27043</code><br>
+来进行端口转发<br>
+<img src="https://mezdosec.github.io/post-images/1687493469522.png" alt="" loading="lazy"><br>
+转发完成后，尝试执行frida-ps -R命令，成功显示说明端口转发成功，可以正常连接frida服务端<br>
+<img src="https://mezdosec.github.io/post-images/1687493590281.png" alt="" loading="lazy"></p>
+<p>接着打开r0capture，具体的使用命令查看使用手册，这里就不多说了</p>
+<p>在该文件目录下cmd</p>
+<p>python r0capture.py -U -f app包名 -v -p 保存的pcap文件名<br>
+输入命令</p>
+<p>抓取某APP的流量通讯信息<br>
+<img src="https://mezdosec.github.io/post-images/1687493714855.png" alt="" loading="lazy"><br>
+生成pcap包<br>
+<img src="https://mezdosec.github.io/post-images/1687493777861.png" alt="" loading="lazy"><br>
+放入wireshark即可看到数据包的内容。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/ru-he-pei-zhi-chalesna-dao-zheng-que-de-liu-liang/">
+                  <h3 class="post-title">
+                    如何配置chales，拿到正确的流量
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

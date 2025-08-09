@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>双向证书校验之无需脱壳逆向获取证书文件 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="如果app使用了双向证书校验，则可以使用r0capture  安卓应用层抓包通杀脚本hook导出证书，此脚本工具可以免去脱壳逆向查找证书密码的过程。
+具体r0capture   安卓应用层抓包通杀脚本安装方法看脚本官方介绍
+https://..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">双向证书校验之无需脱壳逆向获取证书文件</h2>
+            <div class="post-date">2023-06-23</div>
+            
+            <div class="post-content" v-pre>
+              <p>如果app使用了双向证书校验，则可以使用r0capture  安卓应用层抓包通杀脚本hook导出证书，此脚本工具可以免去脱壳逆向查找证书密码的过程。</p>
+<p>具体r0capture   安卓应用层抓包通杀脚本安装方法看脚本官方介绍<br>
+https://github.com/r0ysue/r0capture</p>
+<p>或者看上一篇文章也可以，文章地址：<br>
+....</p>
+<p>官方介绍</p>
+<blockquote>
+<p>引用的这篇文章https://github.com/r0ysue/r0capture</p>
+</blockquote>
+<p><strong>简介</strong><br>
+仅限安卓平台，测试安卓7、8、9、10、11、12、13 可用 ；<br>
+无视所有证书校验或绑定，不用考虑任何证书的事情；<br>
+通杀TCP/IP四层模型中的应用层中的全部协议；<br>
+通杀协议包括：Http,WebSocket,Ftp,Xmpp,Imap,Smtp,Protobuf等等、以及它们的SSL版本；<br>
+通杀所有应用层框架，包括HttpUrlConnection、Okhttp1/3/4、Retrofit/Volley等等；<br>
+无视加固，不管是整体壳还是二代壳或VMP，不用考虑加固的事情；<br>
+如果有抓不到的情况欢迎提issue，或者直接加vx：r0ysue，进行反馈~<br>
+June.18th 2023 update：测试Pixel4/安卓13/KernelSU/Frida16 功能工作正常 正常抓包 导出证书<br>
+January.14th 2021 update：增加几个辅助功能<br>
+增加App收发包函数定位功能<br>
+增加App客户端证书导出功能<br>
+新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接<br>
+用法<br>
+推荐环境：https://github.com/r0ysue/AndroidSecurityStudy/blob/master/FRIDA/A01/README.md<br>
+切记仅限安卓平台7、8、9、10、11 可用 ，禁止使用模拟器。</p>
+<p>Spawn 模式：<br>
+$ python3 r0capture.py -U -f com.coolapk.market -v</p>
+<p>Attach 模式，抓包内容保存成pcap文件供后续分析：<br>
+$ python3 r0capture.py -U 酷安 -v -p iqiyi.pcap</p>
+<p>建议使用Attach模式，从感兴趣的地方开始抓包，并且保存成pcap文件，供后续使用Wireshark进行分析。</p>
+<p>老版本Frida使用包名，新版本Frida使用APP名。APP名必须是点开app后，frida-ps -U显示的那个app名字。<br>
+<img src="https://mezdosec.github.io/post-images/1687572698773.png" alt="" loading="lazy"><br>
+收发包函数定位：Spawn和attach模式均默认开启；<br>
+<code>可以使用python r0capture.py -U -f cn.soulapp.android -v  &gt;&gt; soul3.txt这样的命令将输出重定向至txt文件中稍后过滤内容</code><br>
+<img src="https://mezdosec.github.io/post-images/1687572723236.png" alt="" loading="lazy"><br>
+客户端证书导出功能：默认开启；必须以Spawm模式运行；</p>
+<p><code>运行脚本之前必须手动给App加上存储卡读写权限；</code></p>
+<p><code>并不是所有App都部署了服务器验证客户端的机制，只有配置了的才会在Apk中包含客户端证书</code></p>
+<p><code>导出后的证书位于/sdcard/Download/包名xxx.p12路径，导出多次，每一份均可用，密码默认为：r0ysue，推荐使用keystore-explorer打开查看证书。</code></p>
+<p><em><strong>根据上述描述可以得知：</strong></em><br>
+<strong>只有app使用了双向证书校验，服务器验证客户端的机制，这种情况下，才会在Apk中包含了客户端证书。</strong><br>
+如果不确定App是否部署了服务器验证客户端的机制，我们先把app的读写权限打开，然后直接运行app执行命令：<br>
+<code>***Spawn 模式:</code><br>
+<code> *** python3 r0capture.py -U -f com.coolapk.market -v***</code><br>
+这个命令默认是包含了导出证书的功能，具体怎么判断证书有没有被导出成功？？</p>
+<p><strong>导出后的证书位于/sdcard/Download/包名xxx.p12路径</strong>，查看目录时候可能会导出很多份出来，<br>
+也就是可以看到很多包名xxx.p12证书<br>
+<img src="https://mezdosec.github.io/post-images/1687612360413.png" alt="" loading="lazy"></p>
+<p>不要怀疑用哪个证书,这里每一个导出来的证书都可以使用，只需要其中随便选择一个就可以，导出来的证书默认密码为：r0ysue，得到证书后，直接导入证书到burpsuite或chales抓包软件上即可。</p>
+<p>新增host连接方式“-H”，用于Frida-server监听在非标准端口时的连接。有些App会检测Frida标准端口，因此frida-server开在非标准端口可以绕过检测。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/r0capture-zhua-bao/">
+                  <h3 class="post-title">
+                    r0capture抓app数据包
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

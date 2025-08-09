@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>一次对app使用socket通信的渗透思路记录 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="0x1 概述
+​ 本篇文章记叙了一次测试的目标为app，且该app采用了socket进行通信时，一个非常便秘的渗透测试思路。
+0x2 app分析
+​ 首先拿到app，对其使用VPN代理抓包、WIFI代理抓包均未果，于是决定脱壳看看，使用MT..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">一次对app使用socket通信的渗透思路记录</h2>
+            <div class="post-date">2024-08-09</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="0x1-概述">0x1 概述</h1>
+<p>​ 本篇文章记叙了一次测试的目标为app，且该app采用了socket进行通信时，一个非常便秘的渗透测试思路。</p>
+<h1 id="0x2-app分析">0x2 app分析</h1>
+<p>​ 首先拿到app，对其使用VPN代理抓包、WIFI代理抓包均未果，于是决定脱壳看看，使用MT管理器查看到目标app为360加固，诶，看到360加固，那不就有戏了吗，直接blackdex就能脱，针不戳。</p>
+<p>​ 脱下来直接jadx进行分析为啥抓不到包，由于代码量过多，那么试试搜索一下特征字符串，诸如http、https，但是还是未发现关键点，正当我百思不得其解的时候，突然想到：他不会走的socket代理吧？于是搜索socket字段，最终定位到如下图所示处：<br>
+<img src="https://mezdosec.github.io/post-images/1723171153059.png" alt="" loading="lazy"></p>
+<p>好家伙，我直接好家伙，之前我从未有过socket通信渗透的案例，这不就坐牢了？</p>
+<h1 id="0x3-socket概念">0x3 socket概念</h1>
+<p>​ 这部分为socket概念介绍，懂的师傅可以看下一小节了。</p>
+<p>​ 于是在网上查找概念进行学习，这里摘取关键片段与各位师傅共同学习：</p>
+<pre><code>Socket又称套接字，应用程序通常通过套接字向网络发出请求或者应答网络请求。Socket的本质还是API，是对TCP/IP的封装
+
+每个 socket 被创建后，都会分配两个缓冲区，输入缓冲区和输出缓冲区。
+
+write()/send() 并不立即向网络中传输数据，而是先将数据写入缓冲区中，再由TCP协议将数据从缓冲区发送到目标机器。一旦将数据写入到缓冲区，函数就可以成功返回，不管它们有没有到达目标机器，也不管它们何时被发送到网络，这些都是TCP协议负责的事情。
+
+read()/recv() 函数也是如此，也从输入缓冲区中读取数据，而不是直接从网络中读取。
+</code></pre>
+<p>​ 通过以上片段的学习，已经了解了一点socket的概念，那么就让GPT来帮助我们巩固一下吧：<br>
+<img src="https://mezdosec.github.io/post-images/1723171296158.png" alt="" loading="lazy"><br>
+接保存下来执行看看：</p>
+<pre><code>#客户端
+import socket
+
+# 创建一个 IPv4 TCP 套接字
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# 服务器的 IP 地址和端口
+server_host = &quot;127.0.0.1&quot;
+server_port = 8156
+
+# 连接到服务器
+client_socket.connect((server_host, server_port))
+
+# 发送消息给服务器
+message = 'Hello, 服务器！'
+client_socket.send(message.encode('utf-8'))
+
+# 接收服务器的回复消息
+response = client_socket.recv(1024)
+print(f&quot;服务器回复: {response.decode('utf-8')}&quot;)
+
+# 关闭客户端套接字
+client_socket.close()
+
+</code></pre>
+<pre><code>#服务端
+import socket
+
+# 创建一个 IPv4 TCP 套接字
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# 绑定到指定的主机和端口
+host = &quot;127.0.0.1&quot;  # 服务器的 IP 地址
+port = 8156       # 服务器的端口号
+server_socket.bind((host, port))
+
+# 监听连接
+server_socket.listen(5)
+
+print(f&quot;服务器正在监听 {host}:{port}...&quot;)
+
+while True:
+    # 等待客户端连接
+    client_socket, client_address = server_socket.accept()
+    print(f&quot;连接来自 {client_address}&quot;)
+
+    # 接收客户端发送的消息
+    data = client_socket.recv(1024)
+    if not data:
+        break
+
+    print(f&quot;接收到消息: {data.decode('utf-8')}&quot;)
+
+    # 发送回复消息给客户端
+    response = &quot;Hello, 客户端！&quot;
+    client_socket.send(response.encode('utf-8'))
+
+    # 关闭客户端连接
+    client_socket.close()
+
+# 关闭服务器套接字
+server_socket.close()
+
+
+</code></pre>
+<p>首先运行服务端：<br>
+<img src="https://mezdosec.github.io/post-images/1723171292463.png" alt="" loading="lazy"><br>
+接着运行客户端：<br>
+<img src="https://mezdosec.github.io/post-images/1723171350239.png" alt="" loading="lazy"><br>
+好好好，这不就明白了，这里再嘴欠一句，send/recv可以发送和接收，同理write/read也是，这俩用一个就行。而python里调用socket库只能是send/recv。</p>
+<h1 id="0x4-frida-hook数据">0x4 frida hook数据</h1>
+<p>​ 既然找到了socket代码片段，并且已知通信时send或write函数，那么只需找到这两个函数其中一个即可，通过翻找socket代码片段所在的类，发现了如下代码：<br>
+<img src="https://mezdosec.github.io/post-images/1723171379844.png" alt="" loading="lazy"><br>
+嗯？post函数，第三个参数为request函数，并且还有回调函数，难道这里能直接获取到原始报文？这不得hook看看，好好好，直接右键post函数名，复制为frida片段，运行看看：<br>
+<img src="https://mezdosec.github.io/post-images/1723171397773.png" alt="" loading="lazy"><br>
+好家伙，还真是，那么响应包夜只需要hook onReceived函数即可，真是得来全不费工夫。</p>
+<p>​ 那么，问题来了，我要怎么抓包测试呢？继续分析发现了一个可疑的类名：com.xxx.xxx.xxx.security.impl，里面存放了des、md5、rsa、sm2、sm3、sm4的代码，这里挑选除md5和sm3以外的其他几个加密进行hook，发现sm4居然被执行了，而且居然像是每次发送的请求，啊这。。。。<br>
+<img src="https://mezdosec.github.io/post-images/1723171429828.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1723171445388.png" alt="" loading="lazy"><br>
+那这样看来如果要从wireshark抓取包进行分析，似乎也无解了，并且可以看到writeRandomKey函数每一次的key值都是随机生成的，虽然可以frida固定住key值，但是就算固定住，不也没法抓包改包吗？此时陷入了沉思。</p>
+<h1 id="0x5-抓包改包">0x5 抓包改包</h1>
+<p>​ 此处小标题叫抓包改包，所以此时我确实想到了两个抓包改包的方案，但实际发现只能实现其中一个，且贼便秘，真是蓝瘦香菇，若有师傅有更好的方案可以一块交谈。</p>
+<p>​ 通过前文的分析来看，此时我想到了两个方案进行抓包改包，分别如下：</p>
+<p>方案一</p>
+<p>描述：实现一个socket通信脚本，通过找到app的socket通信服务器，将数据手动构造发送过去（因为 数据 frida可以搞出来）</p>
+<p>难点：这里我确实尝试去实现了，并且发现存在难点无法实现。首先我确实找到了socket通信的服务器及端口，并且通过上述socket客户端脚本发起了socket通信，但是得到的响应为空，这里推测应该是需要传输SM4密文以及key才能有正常的响应。故而这条方案没能成功实现。</p>
+<p>方案二</p>
+<p>描述：直接通过frida hook出原始报文和响应报文，hook前面图中post函数以及onReceived函数即可，然后转入burp修改数据包即可。</p>
+<p>难点：若想要改包，每次都需要点击对应功能并拦截报文进行修改，实在是麻烦（便秘），且有些并发或者遍历导致的漏洞无法进行测试，以及一些其它类型的漏洞，能测的范围实在有限。</p>
+<p>​ 总结：方案二确实可以实现，但是既麻烦（便秘）又很难测出一些有效漏洞，因为其可以改的包只能通过拦截数据包去修改，每一次都得单独触发这个功能才能去改包。</p>
+<p>————————————————<br>
+版权声明：本文为博主原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接和本声明。</p>
+<p>原文链接：https://blog.csdn.net/u014536801/article/details/133276655</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/zhuan-zai-frida-jia-mi-can-shu-tong-sha-hook-dai-ma-mian-tuo-ke/">
+                  <h3 class="post-title">
+                    【转载】frida加密参数通杀hook代码（免脱壳）
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

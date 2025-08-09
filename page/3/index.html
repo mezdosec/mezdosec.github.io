@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="">
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/frida-dexdump-tuo-ke-de-zheng-que-zi-shi/">
+                  <h2 class="post-title">frida-dexdump 脱壳的正确姿势</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-24
+                </div>
+                <div class="post-abstract">
+                  <p>FRIDA-DEXDump安装<br>
+版权声明：本文为微信公众号博主：秃头的逆向痴想 原创文章<br>
+原文链接：https://mp.weixin.qq.com/s/0Tlqsqm-Pdx03-ZiGG-hTQ<br>
+本文只提供学习研究使用，若存在侵权，请及时联系删除</p>
+
+                </div>
+              </div>
+              
+            </article>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/shuang-xiang-zheng-shu-xiao-yan-wu-xu-tuo-ke-ni-xiang-zhi-shi-yong-r0capture-dao-chu-p12-deng-zheng-shu-wen-jian/">
+                  <h2 class="post-title">双向证书校验之无需脱壳逆向获取证书文件</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-23
+                </div>
+                <div class="post-abstract">
+                  
+                </div>
+              </div>
+              
+            </article>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/r0capture-zhua-bao/">
+                  <h2 class="post-title">r0capture抓app数据包</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-23
+                </div>
+                <div class="post-abstract">
+                  
+                </div>
+              </div>
+              
+            </article>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/ru-he-pei-zhi-chalesna-dao-zheng-que-de-liu-liang/">
+                  <h2 class="post-title">如何配置chales，拿到正确的流量</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-21
+                </div>
+                <div class="post-abstract">
+                  <p>本文解决app走的socket协议进行的请求，并没有识别到http或https请求的问题</p>
+
+                </div>
+              </div>
+              
+            </article>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/chales-pei-zhi-ssl-dai-li-huo-qu-https-de-liu-liang/">
+                  <h2 class="post-title">chales配置ssl代理获取https的流量</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-21
+                </div>
+                <div class="post-abstract">
+                  <p>文章主要解决chales抓包软件抓取https流量的配置方法</p>
+
+                </div>
+              </div>
+              
+            </article>
+          
+            <article class="post-item">
+              <div class="left">
+                <a href="https://mezdosec.github.io/post/rao-guo-ssl-shuang-xiang-xiao-yan-zhua-qu-soul-app-de-shu-ju-bao/">
+                  <h2 class="post-title">绕过SSL双向校验抓取SOUL APP的数据包</h2>
+                </a>
+                <div class="post-date">
+                  2023-06-20
+                </div>
+                <div class="post-abstract">
+                  <p>参考了这篇文章：Android抓包总结 - 先知社区 https://xz.aliyun.com/t/6551#toc-10<br>
+毫无反编译经验的我，硬着头皮参考这篇文章抓到数据，记录一下抓包过程，全部是按照参考文章来的，这里我补充了一些细节以及自己遇到的坑。</p>
+
+                </div>
+              </div>
+              
+            </article>
+          
+
+          <div class="pagination-container">
+  
+    <a href="https://mezdosec.github.io/page/2/" class="prev"><i class="icon-arrow-ios-back-outline"></i> 上一页</a>
+  
+  
+    <a href="https://mezdosec.github.io/page/4/" class="next">下一页 <i class="icon-arrow-ios-forward-outline"></i></a>
+  
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

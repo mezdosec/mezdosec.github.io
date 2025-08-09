@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>某银行APP数据加解密分析 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="前言：一篇简单入门级别的加解密hook文章。
+转载自博主jammny文章https://www.yuque.com/jammny/ioh9u7/su23eg
+
+#测试环境
+安卓测试机：一加6（Kali Nethunter）
+Frida版本：..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">某银行APP数据加解密分析</h2>
+            <div class="post-date">2023-06-24</div>
+            
+            <div class="post-content" v-pre>
+              <p>前言：一篇简单入门级别的加解密hook文章。<br>
+转载自博主jammny文章https://www.yuque.com/jammny/ioh9u7/su23eg</p>
+<!-- more -->
+<p>#测试环境</p>
+<p>安卓测试机：一加6（Kali Nethunter）<br>
+Frida版本：14.2.7<br>
+反编译工具：jadx<br>
+r0capture：https://github.com/r0ysue/r0capture</p>
+<p>1、通过 r0capture 输出堆栈内容如下：<br>
+<img src="https://mezdosec.github.io/post-images/1687615902163.png" alt="" loading="lazy"><br>
+2、jadx 搜索关键字“cn.com.hybird.http.HttpsClient”，根据搜索结果，需要关注就两个地方：“cn.com.hybird.http.HttpsClient”和“cn.com.xxxxx.main.base.BaseActivity”。<br>
+<img src="https://mezdosec.github.io/post-images/1687615927177.png" alt="" loading="lazy"><br>
+3、先看“cn.com.xxxx.main.base.BaseActivity”的内容，关键就是HttpsClient.getResObject(url, &quot;POST&quot;, BaseActivity.this.postEncryption(url, map, key))<br>
+<img src="https://mezdosec.github.io/post-images/1687615956671.png" alt="" loading="lazy"><br>
+4、这里需要拆分两个部分进行分析：<br>
+<code>BaseActivity.this.postEncryption(String url, Map&lt;String, String&gt; map, String key)	/* 应该是加密方法 */</code><br>
+<code>HttpsClient.getResObject(String url, String type, Map&lt;String, String&gt; map)	/* 应该是数据请求方法*/</code><br>
+5、先看看BaseActivity.this.postEncryption(String url, Map&lt;String, String&gt; map, String key)，这里定义了post数据的加密方式，需要传入三个参数，第一个是URL链接，第二个明文数据内容，第三个加密key。RSA的公钥信息通过Base64Coder.encodeString()和EncodeFrontPubKey.rsaGetPublicKey()进行编码加密，而数据包明文信息通过SHA512.SHA512Encrypt()和AESUtil.encrypt()进行数据加密，最后返回加密后数据。<br>
+<img src="https://mezdosec.github.io/post-images/1687616085203.png" alt="" loading="lazy"><br>
+6、接着看看HttpsClient.getResObject(String url, String type, Map&lt;String, String&gt; map)，这里需要传递三个参数，第一个参数是URL链接，第二个参数是请求方法，第三个是数据包内容。最后函数直接返回了post()的内容。而post()方法主要执行sendInitialization(url, postorget, encodeParameters(params))。<br>
+<img src="https://mezdosec.github.io/post-images/1687616098357.png" alt="" loading="lazy"><br>
+7、继续跟进sendInitialization(String urlPath, String type, byte[] data)，其实这里功能主要就是对“get”或“post”请求类型进行判断，然后构造数据包。<br>
+<img src="https://mezdosec.github.io/post-images/1687616121295.png" alt="" loading="lazy"><br>
+8、因此现在思路已经很清晰了，post方法中需要传入“data”参数，参数的值是加密过后的数据内容，而get方法中不需要传入“data”参数。因此可以判断只要是post请求的数据都经过加密处理，处理数据加密的位置为：<br>
+<img src="https://mezdosec.github.io/post-images/1687616133890.png" alt="" loading="lazy"><br>
+9、找到cn.com.core.util.crypto.AESUtil文件，可以看到这里采用aes加密，通过hook encrypy方法，打印出参数“content”的内容就是http请求包中的明文数据，通过hook<br>
+decrypt方法就可以实现对http响应包中数据解密。<br>
+<img src="https://mezdosec.github.io/post-images/1687616146248.png" alt="" loading="lazy"><br>
+10、cn.com.core.util.crypto.SHA512文件采用SHA512哈希加密，hook原理同上。<br>
+<img src="https://mezdosec.github.io/post-images/1687616160918.png" alt="" loading="lazy"><br>
+11、最后frida hook 脚本如下：<br>
+<img src="https://mezdosec.github.io/post-images/1687616180419.png" alt="" loading="lazy"><br>
+12、注入脚本<br>
+<img src="https://mezdosec.github.io/post-images/1687616193862.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/xserver-mian-tuo-ke-jie-mi-app/">
+                  <h3 class="post-title">
+                    Xserver免脱壳解密APP密文数据包
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

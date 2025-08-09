@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>夜神模拟器中app抓不到包--安装证书到系统根证书 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="1.起因
+第一次测试app，按照正常的流程将BurpSuite生成的证书导入到夜神模拟器中，但打开app开始抓包时显示证书验证失败，当时也是一脸懵逼，此篇文章也是记录一下遇到的问题。
+
+思路：
+1 、使用openssl将der证书转为pem..." />
+    <meta name="keywords" content="app安全测试" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">夜神模拟器中app抓不到包--安装证书到系统根证书</h2>
+            <div class="post-date">2023-06-20</div>
+            
+            <div class="post-content" v-pre>
+              <p>1.起因<br>
+第一次测试app，按照正常的流程将BurpSuite生成的证书导入到夜神模拟器中，但打开app开始抓包时显示证书验证失败，当时也是一脸懵逼，此篇文章也是记录一下遇到的问题。</p>
+<!-- more -->
+<p>思路：</p>
+<p>1 、使用openssl将der证书转为pem证书，生成pem证书的hash，再生成要使用的证书。</p>
+<p>2 、使用adb调试功能，将证书放到系统证书目录中。</p>
+<p>本次使用环境：夜神模拟器、BurpSuite证书、Kali系统、mac系统</p>
+<p>2.详情<br>
+一般情况下手机在安装了BurpSuite的伪证书后，是可以抓大部分APP数据包的，但APP在安卓7.0或更高的系统下，无法抓取数据包，是因为安卓从7.0开始应用只会信任系统预装的CA证书，而不会信任用户安装的CA证书。这种的情况下，一个解决方法就是使用低于7.0版本的安卓系统进行抓包，另一个就是把使用的伪证书安装到系统证书目录中，伪装成系统证书。</p>
+<p>3.解决办法<br>
+先将BurpSuite证书导出：以下两种方法均可，通过浏览器访问http://burp下载证书，或者直接导出证书。<br>
+<img src="https://mezdosec.github.io/post-images/1687269665512.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687269679071.png" alt="" loading="lazy"><br>
+打开Kali终端，将der证书转为pem证书：</p>
+<p><code>openssl x509 -inform der -in cacert.der -out cacert.pem</code></p>
+<p>生成pem证书的hash:</p>
+<p><code>openssl x509 -inform PEM -subject_hash_old -in cacert.pem</code></p>
+<p>重命名/生成证书：</p>
+<p><code>cp cacert.pem 9a5ba575.0</code><br>
+<img src="https://mezdosec.github.io/post-images/1687269737079.png" alt="" loading="lazy"></p>
+<p>得到Hash值后，将证书文件修改名称为Hash值.0，之后用adb工具push到测试设备，或者文件管理器等其他方式上传到设备的/system/etc/security/cacerts/目录下即可。</p>
+<p>夜神模拟器中自带adb工具（mac系统）<br>
+<img src="https://mezdosec.github.io/post-images/1687269755952.png" alt="" loading="lazy"></p>
+<p><code>adb root </code>// 提升到root权限```</p>
+<p><code>adb remount</code> //重新挂载system分区</p>
+<p><code>adb push 9a5ba575.0 /system/etc/security/cacerts/</code> //将证书放到系统证书目录</p>
+<blockquote>
+<p>版权声明：本文为CSDN博主「一笼管汤包」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>
+原文链接：https://blog.csdn.net/weixin_45495060/article/details/127120219</p>
+</blockquote>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://mezdosec.github.io/VYQITQwoc/" class="tag">
+                    app安全测试
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

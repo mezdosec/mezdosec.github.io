@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>app脱壳dex打开报错 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="使用frida-dexdump，脱完壳，发现部分的dex用 jadx 打开报错，报错如下：
+
+
+dex 文件并未完全的加载出来
+
+解决方法： 使用dump_dex.js 进行脱壳
+下载地址：https://github.com/lastin..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">app脱壳dex打开报错</h2>
+            <div class="post-date">2023-06-24</div>
+            
+            <div class="post-content" v-pre>
+              <p>使用frida-dexdump，脱完壳，发现部分的dex用 jadx 打开报错，报错如下：<br>
+<img src="https://mezdosec.github.io/post-images/1687618141069.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687618146056.png" alt="" loading="lazy"><br>
+dex 文件并未完全的加载出来<br>
+<img src="https://mezdosec.github.io/post-images/1687618163541.png" alt="" loading="lazy"><br>
+解决方法： 使用dump_dex.js 进行脱壳<br>
+下载地址：https://github.com/lasting-yang/frida_dump</p>
+<p>使用方法：<br>
+<code> frida -U --no-pause -f packagename  -l dump_dex.js</code><br>
+等一会就出现了脱壳的dex文件, 路径也显示了, 用re文件管理器打开:<br>
+文件在  /data/data/包名/file/dump_com..  文件夹<br>
+<img src="https://mezdosec.github.io/post-images/1687618220966.png" alt="" loading="lazy"><br>
+返回上一层, 压缩这个文件夹:<br>
+<img src="https://mezdosec.github.io/post-images/1687618235951.png" alt="" loading="lazy"><br>
+会弹出完成的状态, 点击查看, 然后剪切到/data/local/tmp</p>
+<p>pull到电脑,解压, 然后拖到jadx , 就OK了<br>
+<img src="https://mezdosec.github.io/post-images/1687618263140.png" alt="" loading="lazy"></p>
+<blockquote>
+<p>转载至：https://www.yuque.com/avenue-le/yca4od/tt1hrs</p>
+</blockquote>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/frida-dexdump-tuo-ke-de-zheng-que-zi-shi/">
+                  <h3 class="post-title">
+                    frida-dexdump 脱壳的正确姿势
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>绕过SSL双向校验抓取SOUL APP的数据包 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="参考了这篇文章：Android抓包总结 - 先知社区 https://xz.aliyun.com/t/6551#toc-10
+毫无反编译经验的我，硬着头皮参考这篇文章抓到数据，记录一下抓包过程，全部是按照参考文章来的，这里我补充了一些细节以..." />
+    <meta name="keywords" content="app安全测试" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">绕过SSL双向校验抓取SOUL APP的数据包</h2>
+            <div class="post-date">2023-06-20</div>
+            
+            <div class="post-content" v-pre>
+              <p>参考了这篇文章：Android抓包总结 - 先知社区 https://xz.aliyun.com/t/6551#toc-10<br>
+毫无反编译经验的我，硬着头皮参考这篇文章抓到数据，记录一下抓包过程，全部是按照参考文章来的，这里我补充了一些细节以及自己遇到的坑。</p>
+<!-- more -->
+<p>软件：</p>
+<pre><code>soul_v3.4.0.apk
+
+IDAPRO V6.8   https://pan.baidu.com/s/1hqYImNE 提取码：97sf
+
+openssl   windows安装包下载地址：Shining Light Productions 
+
+GDA v3.70   http://www.gda.wiki:9090
+
+Fiddler 
+</code></pre>
+<p>SSL双向校验<br>
+SSL双向校验是在SSL单向校验的基础上, 在说明这部分内容的时候同时也会有绕过SSL单向校验详细的步骤。</p>
+<p>在手机上设置完代理之后, 点击完确认, 发现app出现如下弹窗：<br>
+<img src="https://mezdosec.github.io/post-images/1687308380163.png" alt="" loading="lazy"></p>
+<p>在这个时候查看Fiddler会发现应用没有发出任何请求, 这是因为app会对服务器端的证书进行校验, 这时候我们前面安装的Fiddler证书就不起作用了, 应用在发现证书是伪造的情况下拒绝发送请求。根据这个报错+抓不到包, 我们可以确定应用是存在单向校验的, 也就是SSL pinning, 让我们先来解决SSL pinning的问题。使用JustTrustMe可以绕过客户端的证书校验, 下面勾选上JustTrustMe, 在Xposed框架下使用JustTrustMe绕过SSL pinning。<br>
+<img src="https://mezdosec.github.io/post-images/1687308354492.png" alt="" loading="lazy"><br>
+绕过SSL pinning之后, 就能使用Fiddler抓取到HTTPS的数据包了。<br>
+<img src="https://mezdosec.github.io/post-images/1687308418433.png" alt="" loading="lazy"><br>
+我随便输入了一个手机号码, 按下确定之后, 服务器回传了400的状态码过来, 说需要发送证书以确认客户端的身份。到这一步基本能确定是存在双向校验的了, 接下来的工作就是绕过SSL服务器端的校验了。<br>
+<img src="https://mezdosec.github.io/post-images/1687308443581.png" alt="" loading="lazy"><br>
+如果服务器端会对客户端证书进行校验, 证书应该就直接存放在apk里, 网上与SSL双向校验相关的文章都将证书放到<app>/asset目录下, 也就是app的资源目录下, 也有可能放在/res/raw目录下。直接将app解压之后, 发现证书的位置如下：<br>
+<img src="https://mezdosec.github.io/post-images/1687308494948.png" alt="" loading="lazy"><br>
+如果找半天没找到就用关键词.p12/.pfx搜索证书文件。</p>
+<p>在我们要使用该证书的时候, 需要输入安装证书的密码。这时候就需要从源码中获取安装证书的密码了。可能是因为多个dex文件的原因, 直接用JEB反编译的时候出错了, 所以我用GDA反编译来分析应用的源代码</p>
+<p>获取安装证书的密码<br>
+发现通过关键词&quot;PKCS12&quot;能够定位到加载证书的位置。<br>
+<img src="https://mezdosec.github.io/post-images/1687308541624.png" alt="" loading="lazy"><br>
+上图第二个红框中的load函数的第二个参数其实就是证书的密钥, 追根溯源, 我们可以知道v1参数是下图中调用的函数的返回值。<br>
+<img src="https://mezdosec.github.io/post-images/1687308567203.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687308583995.png" alt="" loading="lazy"><br>
+上图的函数的功能就是传递p0参数, 也就是说p0参数就是证书安装密码。想获取这个密码, 关键在于Auto_getValue函数。到这一步, 只要跟进Null_getStorePassword函数看看就好了。<br>
+<img src="https://mezdosec.github.io/post-images/1687308598916.png" alt="" loading="lazy"><br>
+跟进去发现调用了native层的函数, 查看init函数中具体加载的是哪个so文件：<br>
+<img src="https://mezdosec.github.io/post-images/1687308620197.png" alt="" loading="lazy"><br>
+用IDA反编译soul-netsdk之后, 搜索字符串&quot;getStorePassword&quot;, 就定位到函数getStorePassword上了, F5之后, 获得伪代码和密钥：<br>
+<img src="https://mezdosec.github.io/post-images/1687308637071.png" alt="" loading="lazy"></p>
+<pre><code>如果按F5后报错：please position the cursor within a funtion
+
+解决办法：
+
+步骤1：右键code，会出现汇编代码；
+
+步骤2：右键creat fun 
+
+完成步骤1和步骤2，就可以正常的反编译出伪代码。
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1687308665401.png" alt="" loading="lazy"><br>
+代理添加客户端证书<br>
+HttpCanary添加客户端证书进行抓包的过程可以参照文章Android平台HTTPS抓包解决方案及问题分析, 在自己头昏的时候也感谢这篇文章的作者MegatronKing点醒我。下面主要讲解Fiddler和burpsuite添加客户端证书的方法。</p>
+<p>fiddler操作过程</p>
+<p>尝试一下用Fiddler处理这部分的内容来安装客户端的证书, 用来绕过双向认证。<br>
+<img src="https://mezdosec.github.io/post-images/1687308693135.png" alt="" loading="lazy"><br>
+用Fiddler抓取该应用的数据包的时候, 发现Fiddler出现了上面的弹窗, 提示要添加ClientCertificate.cer, 才能抓取到传输的数据包, 不然只会出现400的状态码。而我们文件目录下只能找到client.p12和client.crt两种格式的证书文件, 所以我们需要将已有的client证书转换成.cer格式的证书。<br>
+<img src="https://mezdosec.github.io/post-images/1687308733725.png" alt="" loading="lazy"><br>
+好像应用中只出现.p12格式的证书的情况比较常见, 所以下面只会提及如何使用openssl将.p12格式的证书转换成.cer/.der格式的证书。(.der和.cer格式的证书仅有文件头和文件尾不同)</p>
+<p>下面的命令实现了证书的格式转换, .p12-&gt;.pem-&gt;.cer, 在生成.pem格式的证书之后, 需要输入证书的密码, 也就是我们上面逆向获取的证书密码。最后将ClientCertificate.cer移动到之前Fiddler弹窗出现的目录下, 也就是&lt;Fiddler安装路径&gt;\Fiddler2下。</p>
+<p><code># 将.p12证书转换成.pem格式</code><br>
+$ openssl pkcs12 -in client.p12 -out ClientCertificate.pem -nodes<br>
+Enter Import Password:<br>
+<code># 将.pem证书转换成.cer格式</code><br>
+$ openssl x509 -outform der -in ClientCertificate.pem -out ClientCertificate.cer<br>
+<img src="https://mezdosec.github.io/post-images/1687308774531.png" alt="" loading="lazy"><br>
+输入密码时是不显示的，正常输入就行，设置PEM密码和获取到的密钥一致</p>
+<p>现在打开Fiddler尝试抓包, 发现原本显示400的数据包现在能够正常抓取到了, 如果还是不能正常抓取到, 双击client.p12将证书安装到本地试试看。<br>
+<img src="https://mezdosec.github.io/post-images/1687308805969.png" alt="" loading="lazy"><br>
+成功抓到包</p>
+<blockquote>
+<p>版权声明：本文为CSDN博主「Circle-C」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。<br>
+原文链接：https://blog.csdn.net/qq_38316655/article/details/104176882</p>
+</blockquote>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://mezdosec.github.io/VYQITQwoc/" class="tag">
+                    app安全测试
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/ye-shen-mo-ni-qi-zhong-app-zhua-bu-dao-bao-an-zhuang-zheng-shu-dao-xi-tong-gen-zheng-shu/">
+                  <h3 class="post-title">
+                    夜神模拟器中app抓不到包--安装证书到系统根证书
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Xserver免脱壳解密APP密文数据包 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="在测试APP的时候有时候会遇到参数加密的情况，这样就会导致不能修改请求参数，很多漏洞都测试不了了。一般常用的方法是把APP放到jadx中脱出源码，然后在源码中找到对应的加密算法，这种方法遇到没加壳的APP还好，但是遇到加密的APP或者代码混..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Xserver免脱壳解密APP密文数据包</h2>
+            <div class="post-date">2023-06-24</div>
+            
+            <div class="post-content" v-pre>
+              <p>在测试APP的时候有时候会遇到参数加密的情况，这样就会导致不能修改请求参数，很多漏洞都测试不了了。一般常用的方法是把APP放到jadx中脱出源码，然后在源码中找到对应的加密算法，这种方法遇到没加壳的APP还好，但是遇到加密的APP或者代码混淆的APP就很头痛了。Xserver的应用场景就是免脱壳，将明文数据先代理到Burp中，然后在传输到APP中进行加密</p>
+<!-- more -->
+<p>下载地址：https://github.com/monkeylord/XServer</p>
+<p>##0x02 应用<br>
+环境：雷电模拟器3.90.0<br>
+<img src="https://mezdosec.github.io/post-images/1687613899590.png" alt="" loading="lazy"><br>
+安装Xposed+Xserver然后模块中激活Xserver<br>
+<img src="https://mezdosec.github.io/post-images/1687613912013.png" alt="" loading="lazy"><br>
+原始的APP请求数据<br>
+<img src="https://mezdosec.github.io/post-images/1687613927542.png" alt="" loading="lazy"><br>
+Xserver中选择需要Hook的APP<br>
+<img src="https://mezdosec.github.io/post-images/1687613942651.png" alt="" loading="lazy"><br>
+然后重启APP，进入雷电模拟器的根目录，执行命令.\adb.exe forward tcp:8000 tcp:8000<br>
+<img src="https://mezdosec.github.io/post-images/1687613955901.png" alt="" loading="lazy"><br>
+启动刚刚选择的APP后访问http://127.0.0.1:8000，如果出现如下界面就算配置好了<br>
+<img src="https://mezdosec.github.io/post-images/1687613970077.png" alt="" loading="lazy"><br>
+在Filter中可以过滤当前APP的类，这里我们需要找到加密的类，例如：AES、DES<br>
+搜索AES关键字，找到了两个类<br>
+<img src="https://mezdosec.github.io/post-images/1687613983293.png" alt="" loading="lazy"><br>
+然后点击Load All Methods以及右边的Class单选框<br>
+<img src="https://mezdosec.github.io/post-images/1687614051139.png" alt="" loading="lazy"><br>
+这里可以看见encrypt方法，点击左边的选框就可以Hook它<br>
+<img src="https://mezdosec.github.io/post-images/1687614064710.png" alt="" loading="lazy"><br>
+然后对APP随便操作几下，发送几个请求，下方就会出现Hook到的方法<br>
+<img src="https://mezdosec.github.io/post-images/1687614087178.png" alt="" loading="lazy"><br>
+点击进入这个方法，就把流量转发到Burp中了<br>
+<img src="https://mezdosec.github.io/post-images/1687614098563.png" alt="" loading="lazy"><br>
+Burp中的明文数据<br>
+<img src="https://mezdosec.github.io/post-images/1687614110045.png" alt="" loading="lazy"><br>
+修改方法名，可以解密数据<br>
+<img src="https://mezdosec.github.io/post-images/1687614122300.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/app-tuo-ke-dex-da-kai-bao-cuo/">
+                  <h3 class="post-title">
+                    app脱壳dex打开报错
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

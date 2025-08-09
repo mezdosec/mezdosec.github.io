@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Swagger ui接口自动化批量漏洞测试 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Swagger介绍文章地址
+目录
+postman
+导入Swagger Api
+设置Environment
+代理设置
+批量自动化测试
+结合xray
+文章引用：&gt;https://www.yii666.com/blog/58375.html..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Swagger ui接口自动化批量漏洞测试</h2>
+            <div class="post-date">2023-07-31</div>
+            
+            <div class="post-content" v-pre>
+              <p>Swagger介绍文章地址<br>
+目录<br>
+postman<br>
+导入Swagger Api<br>
+设置Environment<br>
+代理设置<br>
+批量自动化测试<br>
+结合xray</p>
+<p>文章引用：&gt;https://www.yii666.com/blog/58375.html</p>
+<h1 id="swagger介绍">swagger介绍</h1>
+<p>Swagger 是一个用于生成、描述和调用 RESTful 接口的 Web 服务。通俗的来讲，Swagger 就是将项目中所有（想要暴露的）接口展现在页面上，并且可以进行接口调用和测试的服务。</p>
+<p>在平时渗透测试的的时候，经常会发现Swagger ui（swagger-ui是将api接口进行可视化展示的工具）接口泄露，如下，在这个页面中暴露了目标站点中所有的接口信息，所以可以对这个接口进行漏洞测试，看是否存在未授权访问、sql注入、文件上传等漏洞。由于接口太多，一个个接口测试的话太费时间，所以出了这篇自动化接口漏洞测试文章<br>
+<img src="https://mezdosec.github.io/post-images/1690936005432.png" alt="" loading="lazy"></p>
+<p>利用思路：</p>
+<ul>
+<li>将Swagger ui中所有的接口导入到postman</li>
+<li>postman设置代理，将流量转发给burpsuite，方便观察发包情况</li>
+<li>对导入的所有api自动运行测试，让postman自动对每个api进行请求</li>
+<li>burpsuite挂上xray，进行漏洞检测</li>
+</ul>
+<h1 id="postman">postman</h1>
+<p>postman是一个api接口自动化测试工具，下载：Download Postman | Get Started for Free</p>
+<h1 id="导入swagger-api">导入Swagger Api</h1>
+<pre><code>1、访问Swagger ui，箭头中的就是api接口地址，将其复制
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1690936015598.png" alt="" loading="lazy"><br>
+与域名拼接后访问一下，将整个地址复制“https://xx.com/cdy-api-mng/v2/api-docs”<br>
+<img src="https://mezdosec.github.io/post-images/1690936023846.png" alt="" loading="lazy"><br>
+1、打开postman<br>
+点击“import”，在Link下填上刚才复制的api地址，点击继续<br>
+<img src="https://mezdosec.github.io/post-images/1690936033234.png" alt="" loading="lazy"><br>
+然后点击import，进行导入<br>
+<img src="https://mezdosec.github.io/post-images/1690936039957.png" alt="" loading="lazy"><br>
+导入成功后，可在apis中查看刚才导入的整个Swagger api接口<br>
+<img src="https://mezdosec.github.io/post-images/1690936052156.png" alt="" loading="lazy"></p>
+<h1 id="设置environment">设置Environment</h1>
+<p>Environment即环境变量，随便点击一个地址过去看一下，这里的baseurl是一个变量，postman对所有api的请求的格式都是“http://ip/详细地址”，http://ip为变量，需要设置值。把鼠标放在baseUrl处，会显示其值，将其地址记住<br>
+<img src="https://mezdosec.github.io/post-images/1690936061302.png" alt="" loading="lazy"><br>
+点击如下Add，添加“active Environment”<br>
+<img src="https://mezdosec.github.io/post-images/1690936069638.png" alt="" loading="lazy"><br>
+填写如下，设置变量名为test。其值设置为“https://xx.xx.com/cdy-api-mng/”<br>
+<img src="https://mezdosec.github.io/post-images/1690936077105.png" alt="" loading="lazy"><br>
+然后选择刚刚设置的环境&quot;test&quot;<br>
+<img src="https://mezdosec.github.io/post-images/1690936085036.png" alt="" loading="lazy"><br>
+此时再点击就能看到我们设置的环境<br>
+<img src="https://mezdosec.github.io/post-images/1690936093833.png" alt="" loading="lazy"><br>
+最后可以尝试进行发包测试了<br>
+<img src="https://mezdosec.github.io/post-images/1690936102882.png" alt="" loading="lazy"></p>
+<h1 id="代理设置">代理设置</h1>
+<p>给postman设置一个代理，代理地址为burp的监听地址。这样burpsuite就能接收来自postman的数据包<br>
+<img src="https://mezdosec.github.io/post-images/1690936111514.png" alt="" loading="lazy"><br>
+接收到http数据，则说明代理成功<br>
+<img src="https://mezdosec.github.io/post-images/1690936119633.png" alt="" loading="lazy"></p>
+<h1 id="批量自动化测试">批量自动化测试</h1>
+<p>api接口地址众多，如果一个个接口点击进行测试，效率太过于低下。所以需要批量自动进行测试</p>
+<p>定位到第一行，点击“Test and Automation”<br>
+<img src="https://mezdosec.github.io/post-images/1690936129702.png" alt="" loading="lazy"><br>
+点击“run”<br>
+<img src="https://mezdosec.github.io/post-images/1690936172361.png" alt="" loading="lazy"><br>
+继续点击<br>
+<img src="https://mezdosec.github.io/post-images/1690936185115.png" alt="" loading="lazy"><br>
+postman会自动对所有的api进行发包测试，此时在burpsuite中可以查看到具体的数据包<br>
+<img src="https://mezdosec.github.io/post-images/1690936195699.png" alt="" loading="lazy"></p>
+<h1 id="结合xray">结合xray</h1>
+<p>为了最大程度实现自动化漏洞挖掘，我们可以同时把流量转发给xray进行漏洞探测。burp配置代理，将流量转发给xray</p>
+<p><img src="https://mezdosec.github.io/post-images/1690936208843.png" alt="" loading="lazy"><br>
+xray开启监听，接收来自burp的流量<br>
+<img src="https://mezdosec.github.io/post-images/1690936221811.png" alt="" loading="lazy"><br>
+开始自动化对所有api接口进行扫描<br>
+<img src="https://mezdosec.github.io/post-images/1690936235447.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/mou-yin-xing-app-shu-ju-jia-jie-mi-fen-xi/">
+                  <h3 class="post-title">
+                    某银行APP数据加解密分析
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://mezdosec.github.io</id>
+    <title>小呆博客</title>
+    <updated>2025-08-09T15:27:47.407Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://mezdosec.github.io"/>
+    <link rel="self" href="https://mezdosec.github.io/atom.xml"/>
+    <logo>https://mezdosec.github.io/images/avatar.png</logo>
+    <icon>https://mezdosec.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2025, 小呆博客</rights>
+    <entry>
+        <title type="html"><![CDATA[java代码审计]]></title>
+        <id>https://mezdosec.github.io/post/java-dai-ma-shen-ji/</id>
+        <link href="https://mezdosec.github.io/post/java-dai-ma-shen-ji/">
+        </link>
+        <updated>2025-01-06T02:36:22.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[IOS逆向之破解某知名抓包APP]]></title>
+        <id>https://mezdosec.github.io/post/ios-ni-xiang-zhi-po-jie-mou-zhi-ming-zhua-bao-app/</id>
+        <link href="https://mezdosec.github.io/post/ios-ni-xiang-zhi-po-jie-mou-zhi-ming-zhua-bao-app/">
+        </link>
+        <updated>2024-08-27T02:46:19.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[一次对app使用socket通信的渗透思路记录]]></title>
+        <id>https://mezdosec.github.io/post/yi-ci-dui-app-shi-yong-socket-tong-xin-de-shen-tou-si-lu-ji-lu/</id>
+        <link href="https://mezdosec.github.io/post/yi-ci-dui-app-shi-yong-socket-tong-xin-de-shen-tou-si-lu-ji-lu/">
+        </link>
+        <updated>2024-08-09T02:33:29.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【转载】frida加密参数通杀hook代码（免脱壳）]]></title>
+        <id>https://mezdosec.github.io/post/zhuan-zai-frida-jia-mi-can-shu-tong-sha-hook-dai-ma-mian-tuo-ke/</id>
+        <link href="https://mezdosec.github.io/post/zhuan-zai-frida-jia-mi-can-shu-tong-sha-hook-dai-ma-mian-tuo-ke/">
+        </link>
+        <updated>2024-08-09T02:23:07.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[iOS逆向之frida检测绕过]]></title>
+        <id>https://mezdosec.github.io/post/ios-ni-xiang-zhi-frida-jian-ce-rao-guo/</id>
+        <link href="https://mezdosec.github.io/post/ios-ni-xiang-zhi-frida-jian-ce-rao-guo/">
+        </link>
+        <updated>2024-07-31T00:55:03.000Z</updated>
+        <summary type="html"><![CDATA[<p>以下文章来源于微信  闻鸡习武 ，作者吾奶习武之人</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>以下文章来源于微信  闻鸡习武 ，作者吾奶习武之人</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ios越狱失败解决办法]]></title>
+        <id>https://mezdosec.github.io/post/ios-yue-yu-shi-bai-jie-jue-ban-fa/</id>
+        <link href="https://mezdosec.github.io/post/ios-yue-yu-shi-bai-jie-jue-ban-fa/">
+        </link>
+        <updated>2024-07-31T00:02:07.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ios 应用砸壳]]></title>
+        <id>https://mezdosec.github.io/post/ios-ke-hu-duan-za-ke/</id>
+        <link href="https://mezdosec.github.io/post/ios-ke-hu-duan-za-ke/">
+        </link>
+        <updated>2024-07-30T01:32:12.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[【iOS逆向与安全】frida-trace命令大全]]></title>
+        <id>https://mezdosec.github.io/post/ios-ni-xiang-yu-an-quan-frida-trace-ming-ling-da-quan/</id>
+        <link href="https://mezdosec.github.io/post/ios-ni-xiang-yu-an-quan-frida-trace-ming-ling-da-quan/">
+        </link>
+        <updated>2024-07-29T14:57:42.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Swagger ui接口自动化批量漏洞测试]]></title>
+        <id>https://mezdosec.github.io/post/swagger-ui-jie-kou-zi-dong-hua-pi-liang-lou-dong-ce-shi/</id>
+        <link href="https://mezdosec.github.io/post/swagger-ui-jie-kou-zi-dong-hua-pi-liang-lou-dong-ce-shi/">
+        </link>
+        <updated>2023-07-31T08:41:38.000Z</updated>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[某银行APP数据加解密分析]]></title>
+        <id>https://mezdosec.github.io/post/mou-yin-xing-app-shu-ju-jia-jie-mi-fen-xi/</id>
+        <link href="https://mezdosec.github.io/post/mou-yin-xing-app-shu-ju-jia-jie-mi-fen-xi/">
+        </link>
+        <updated>2023-06-24T14:06:22.000Z</updated>
+        <summary type="html"><![CDATA[<p>前言：一篇简单入门级别的加解密hook文章。<br>
+转载自博主jammny文章https://www.yuque.com/jammny/ioh9u7/su23eg</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>前言：一篇简单入门级别的加解密hook文章。<br>
+转载自博主jammny文章https://www.yuque.com/jammny/ioh9u7/su23eg</p>
+]]></content>
+    </entry>
+</feed>

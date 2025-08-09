@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>ios 应用砸壳 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="砸壳脚本
+https://github.com/AloneMonkey/frida-ios-dump
+frida-ios-dump
+这里除了frida还有一些额外的环境
+进入frida-ios-dump目录，安装一些所需的其他python库..." />
+    <meta name="keywords" content="ios砸壳" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">ios 应用砸壳</h2>
+            <div class="post-date">2024-07-30</div>
+            
+            <div class="post-content" v-pre>
+              <p>砸壳脚本<br>
+https://github.com/AloneMonkey/frida-ios-dump</p>
+<p>frida-ios-dump<br>
+这里除了frida还有一些额外的环境<br>
+进入frida-ios-dump目录，安装一些所需的其他python库</p>
+<pre><code>pip3 install -r reguirements.txt
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1722386735710.jpg" alt="" loading="lazy"><br>
+usbmuxd<br>
+brew install usbmuxd</p>
+<h2 id="砸壳">砸壳</h2>
+<h3 id="终端1">终端1</h3>
+<h1 id="免密ssh登录越狱的iphone手机">免密ssh登录越狱的iPhone手机</h1>
+<p>电脑端生成rsa密钥对ssh-keygen -t rsa -P '', -P ''表示密钥的密码为空<br>
+ssh-keygen -t rsa -P ''<br>
+<img src="https://mezdosec.github.io/post-images/1722385309960.jpg" alt="" loading="lazy"></p>
+<h2 id="上传公钥到手机">上传公钥到手机</h2>
+<figure data-type="image" tabindex="1"><img src="https://mezdosec.github.io/post-images/1722385316975.jpg" alt="" loading="lazy"></figure>
+<p>先连接手机终端，执行ssh-keygen，使手机自动生成.ssh文件夹，可见iphone越狱的手机路径在var/root/.ssh/id_rsa/</p>
+<p>执行scp /root/.ssh/id_rsa.pub root@192.168.232.233:/var/root/.ssh/authorized_keys<br>
+<img src="https://mezdosec.github.io/post-images/1722385444656.jpg" alt="" loading="lazy"></p>
+<p>使手机当前用户mobile和.ssh文件夹的权限是700， .ssh目录下的authorized_keys文件需要600或644权限</p>
+<pre><code>chmod 700 mobile
+chmod 700 .ssh
+chmod 600 authorized_keys
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1722385699560.jpg" alt="" loading="lazy"><br>
+电脑端使用如下命令免密登录了同wifi下的iphone手机了</p>
+<p>ssh -i /Users/xxx/.ssh/id_rsa_13 mobile@xxx.xxx.xxx.xxx<br>
+或者ssh root@192.168.232.233<br>
+<img src="https://mezdosec.github.io/post-images/1722385753756.jpg" alt="" loading="lazy"></p>
+<h1 id="砸壳-2">砸壳</h1>
+<p>mac终端或者kali终端，新建命令行窗口执行<br>
+iproxy 2222 22<br>
+执行命令后，窗口不要关闭。<br>
+然后再新打开个命令行窗口<br>
+执行以下命令查看手机上面安装的应用清单<br>
+python3 dump.py -l<br>
+<img src="https://mezdosec.github.io/post-images/1722386015322.png" alt="" loading="lazy"><br>
+这里以百度输入法为例</p>
+<p>fridadump xxxx<br>
+Start the target app xxxxx<br>
+<img src="https://mezdosec.github.io/post-images/1722386320661.jpg" alt="" loading="lazy"><br>
+砸完壳后<br>
+在frida-ios-dump目录可以看到脱壳后的ipa包<br>
+<img src="https://mezdosec.github.io/post-images/1722386394310.jpg" alt="" loading="lazy"></p>
+<p>解压这个ipa包</p>
+<pre><code>unzip xx.ipa
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1722386442021.jpg" alt="" loading="lazy"><br>
+解压后，会在当前目录得到一个payload文件夹<br>
+<img src="https://mezdosec.github.io/post-images/1722386453161.jpg" alt="" loading="lazy"><br>
+在payload目录下会看到相应的包,后缀为.app的<br>
+<img src="https://mezdosec.github.io/post-images/1722386483232.jpg" alt="" loading="lazy"><br>
+此时我们右键选择对应app，选择显示包内容，新建一个终端窗口，cd到包内容所在的路径中。<br>
+<img src="https://mezdosec.github.io/post-images/1722386557308.jpg" alt="" loading="lazy"><br>
+在包路径中，一般文件大小最大的二进制文件，就是脱壳后我们需要查看分析的应用包，直接otool -l 查看</p>
+<p>在终端输入：otool -l xxx | grep crypt，我们会看到一个重要的信息，cryptid 1，这表明这个项目文件还未没砸壳，0则表示已经完成砸壳。<br>
+<img src="https://mezdosec.github.io/post-images/1722309126526.png" alt="" loading="lazy"></p>
+<p>可以看到图片中的包已经完成砸壳</p>
+<h2 id="二进制逆向查看">二进制逆向查看</h2>
+<p>直接将上述得到的IPA丢给hopper或者IDA中即可查看逆向代码<br>
+<img src="https://mezdosec.github.io/post-images/1722386587429.jpg" alt="" loading="lazy"></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://mezdosec.github.io/TgjQoWnXq/" class="tag">
+                    ios砸壳
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/ios-ni-xiang-yu-an-quan-frida-trace-ming-ling-da-quan/">
+                  <h3 class="post-title">
+                    【iOS逆向与安全】frida-trace命令大全
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

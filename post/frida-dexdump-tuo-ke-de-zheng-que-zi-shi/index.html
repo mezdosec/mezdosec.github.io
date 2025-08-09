@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>frida-dexdump 脱壳的正确姿势 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="FRIDA-DEXDump安装
+版权声明：本文为微信公众号博主：秃头的逆向痴想 原创文章
+原文链接：https://mp.weixin.qq.com/s/0Tlqsqm-Pdx03-ZiGG-hTQ
+本文只提供学习研究使用，若存在侵权，请及..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">frida-dexdump 脱壳的正确姿势</h2>
+            <div class="post-date">2023-06-24</div>
+            
+            <div class="post-content" v-pre>
+              <p>FRIDA-DEXDump安装<br>
+版权声明：本文为微信公众号博主：秃头的逆向痴想 原创文章<br>
+原文链接：https://mp.weixin.qq.com/s/0Tlqsqm-Pdx03-ZiGG-hTQ<br>
+本文只提供学习研究使用，若存在侵权，请及时联系删除</p>
+<!-- more -->
+<p>一、Dexdump简介<br>
+Dexdump是基于Frida开发的脱壳工具。（下面脱壳一个360加固的软件，一点资讯）</p>
+<p>需要的环境：安装好了Python、frida、frida-server、手机或模拟器</p>
+<p>二、使用步骤<br>
+1.安装<br>
+方法如下：<br>
+<code>GitHub地址：https://Github.com/hluwa/FRIDA-DEXdump</code><br>
+使用方法：一是下载源码，通过运行Frida-Dexdump文件中的main.py文件来脱壳（这种我不会，下次看看怎么弄）</p>
+<p>二是通过cmd命令行安装<br>
+<code>pip install Frida-Dexdump</code><br>
+<img src="https://mezdosec.github.io/post-images/1687619231930.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687619247819.png" alt="" loading="lazy"><br>
+cmd输入frida-dexdump -h可以看到frida-dexdump 相关的帮助<br>
+<img src="https://mezdosec.github.io/post-images/1687619260613.png" alt="" loading="lazy"><br>
+一些常用命令：</p>
+<pre><code>##-U是USB、-d是深度搜索、-f表示目标对象、-o是输出
+ 
+frida-dexdump -U -d -f 包名 -o 存放dex文件路径
+   
+cmd输入 frida-dexdump -FU 指令，快速脱壳安卓手机前台运行的程序
+ 
+当然也可以使用frida-dexdump -U -f com.app.pkgname指令脱壳指定的程序。
+ 
+这里使用的是frida-dexdump -FU
+</code></pre>
+<p>下面可以进行脱壳了<br>
+#2.脱壳<br>
+1、打开雷神模拟器，并打开要脱壳的app，我这里是打开一点资讯app</p>
+<p>启动frida：</p>
+<p>我用到的命令过程：<br>
+<code>adb -s emulator-5554 shell</code><br>
+cmd中启动 frida-server<br>
+su<br>
+雷电模拟器中的地址<br>
+<img src="https://mezdosec.github.io/post-images/1687619382808.png" alt="" loading="lazy"></p>
+<pre><code>进入模拟器或者手机放置frida-sever的目录
+ cd /data/local/tmp
+查看
+ls
+ ./frida-server-15.1.22-android-x86
+</code></pre>
+<p>完整截图：<br>
+<img src="https://mezdosec.github.io/post-images/1687619410424.png" alt="" loading="lazy"></p>
+<p>然后新开一个cmd窗口，定位到 frida-dexdump 命令的目录</p>
+<pre><code>//进入Python安装目录中的Scripts文件夹
+C:\Users\Administrator&gt;
+cd C:\Users\Administrator\AppData\Local\Programs\Python\Python37\Scripts
+ 
+//输入命令 frida-dexdump -FU，如下图（参数说明，参数 U 是usb，参数 F是前台活动app）
+ 
+C:\Users\Administrator\AppData\Local\Programs\Python\Python37\Scripts&gt;frida-dexdump -FU
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1687619441480.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687619460874.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687619471000.png" alt="" loading="lazy"><br>
+注意生成地址，位置可能不一样，第二次脱壳地址是这个<br>
+<img src="https://mezdosec.github.io/post-images/1687619485969.png" alt="" loading="lazy"><br>
+还有一种方法（在夜神模拟器-安卓9测试版本中）：</p>
+<pre><code>    同样新开一个cmd窗口，定位到 frida-dexdump 命令的目录
+
+    然后
+</code></pre>
+<figure data-type="image" tabindex="1"><img src="https://mezdosec.github.io/post-images/1687653681300.png" alt="" loading="lazy"></figure>
+<p>成功截图：</p>
+<figure data-type="image" tabindex="2"><img src="https://mezdosec.github.io/post-images/1687653673624.png" alt="" loading="lazy"></figure>
+<p>#其他app脱壳过程示例</p>
+<p>部分脱壳命令：<br>
+步骤：<br>
+1、打开雷神模拟器，并打开要脱壳的app，我这里是打开保利票务app<br>
+<img src="https://mezdosec.github.io/post-images/1687618768824.png" alt="" loading="lazy"><br>
+2、打开命令行 cmd，输入 adb shell，进入模拟器，启动 frida-server，如下图<br>
+<img src="https://mezdosec.github.io/post-images/1687618780188.png" alt="" loading="lazy"><br>
+3、再打开一个命令行cmd，定位到 frida-dexdump 命令的目录，cd /d D:\python38\Scripts</p>
+<p>4、输入命令 frida-dexdump -FU，如下图（参数说明，参数 U 是usb，参数 F是前台活动app）<br>
+<img src="https://mezdosec.github.io/post-images/1687618795426.png" alt="" loading="lazy"><br>
+5、其他命令，用 frida-ps -U 可以看到运行的app，可以看到名称和进程pid，然后可以用如下命令抓包，<br>
+frida-dexdump -U -p  进程id<br>
+frida-dexdump -U -n 保利票务<br>
+<img src="https://mezdosec.github.io/post-images/1687654793768.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687654798376.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687654803658.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687654809775.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/shuang-xiang-zheng-shu-xiao-yan-wu-xu-tuo-ke-ni-xiang-zhi-shi-yong-r0capture-dao-chu-p12-deng-zheng-shu-wen-jian/">
+                  <h3 class="post-title">
+                    双向证书校验之无需脱壳逆向获取证书文件
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

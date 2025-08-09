@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>IOS逆向之破解某知名抓包APP | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="0x00 前言
+本文的测试目标是一个******APP，可以使用hook或者代理的方式来获取高级功能，如解密HTTPS流量、重写HTTP请求以及重放等功能。本文主要提供一些思路以及介绍一下数据之间的转换。
+0x01 分析
+运行后发现高级功能..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">IOS逆向之破解某知名抓包APP</h2>
+            <div class="post-date">2024-08-27</div>
+            
+            <div class="post-content" v-pre>
+              <h1 id="0x00-前言">0x00 前言</h1>
+<p>本文的测试目标是一个******APP，可以使用hook或者代理的方式来获取高级功能，如解密HTTPS流量、重写HTTP请求以及重放等功能。本文主要提供一些思路以及介绍一下数据之间的转换。</p>
+<h1 id="0x01-分析">0x01 分析</h1>
+<p>运行后发现高级功能都需要付费才可以，抓包发现请求和返回都加密了。<br>
+<img src="https://mezdosec.github.io/post-images/1724726949839.png" alt="" loading="lazy"><br>
+使用frida-ios-dump将ipa文件dump出来，之后用ida打开，发现该程序是用到了OC和swift。而且http请求采用了Alamofire，它是一个用 Swift 编写的 HTTP 网络库。该程序较小，猜测加密函数中有encrypt关键字，于是在函数中搜索encrypt。当然也可以根据http请求的一些内容搜索进而去定位加密的算法，在这里就不演示了。<br>
+<img src="https://mezdosec.github.io/post-images/1724727962886.png" alt="" loading="lazy"><br>
+可以看到有一些，可以使用frida-trace来追踪一下是调用了哪个方法。</p>
+<pre><code>frida-trace -U -f com.stormtech.sniffer -m &quot;*[* *encrypt*]&quot;
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1724728000899.png" alt="" loading="lazy"><br>
+经过进一步验证发现是调用了类XMXXTEA相关的加密函数。一般这样同个类存在多个加（解）密，大多数都是简单的调用复杂的。从上图就可以看出来</p>
+<pre><code>encryptStringToBase64String:arg1 stringKey:arg2
+</code></pre>
+<p>调用了</p>
+<pre><code>encryptToBase64String:arg1 stringKey:arg2
+</code></pre>
+<p>所以我们看</p>
+<pre><code>+[XMXXTEA encryptStringToBase64String:arg1 stringKey:arg2]
+</code></pre>
+<p>即可。命令如下：</p>
+<pre><code> frida-trace -U -f com.stormtech.sniffer -m &quot;+[XMXXTEA encryptStringToBase64String:stringKey:]&quot;
+</code></pre>
+<p>执行后可以发现与抓包的内容一致。<br>
+<img src="https://mezdosec.github.io/post-images/1724728119798.png" alt="" loading="lazy"><br>
+接下来我们看一下是否有数据的解密，同样在ida中搜decrypt根据上面的经验，猜测解密的是</p>
+<pre><code>+[XMXXTEA decryptBase64StringToString:stringKey:]
+</code></pre>
+<p>结果进行追踪后发现并没调用，这里解密采用的是</p>
+<pre><code>+[XMXXTEA decryptBase64String:stringKey:]
+</code></pre>
+<p>可以看到解密数据。<br>
+<img src="https://mezdosec.github.io/post-images/1724728176243.png" alt="" loading="lazy"><br>
+返回的json中有几个关键的键值可以猜出其含义。</p>
+<p>例如isVip应该是判断是否为会员，expire_on表示到期时间，auth_quantity是授权数量，function_list应该是拥有的功能，比如非会员用户只有一个抓包功能，如果要拥有解密HTTPS、重写等功能，则function_list应该是[1,2,3]。</p>
+<p>当然这些不是我的猜测了,因为我前年就借了正版账号。尝试修改一下isVip的值为1，看是否有反应。首先看一下</p>
+<pre><code>+[XMXXTEA decryptBase64String:stringKey:]
+</code></pre>
+<p>解密返回值的类型是什么。<br>
+主要代码：</p>
+<pre><code>onLeave(log, retval, state) {
+    var ret = ObjC.Object(retval);
+    log(`ret type is --&gt;`+ret.$className);
+  }
+</code></pre>
+<p>执行后返回的结果：</p>
+<pre><code>ret type is --&gt;NSConcreteData
+</code></pre>
+<p>返回值是NSConcreteData类型的，可以看作为是NSData。</p>
+<p>修改返回值有两种方法，第一种是将NSData转化为NSString，然后利用字符串替换来修改，修改完毕后转化NSData并替换；</p>
+<p>第二种是将NSData转化为可变数组NSMutableDictionary，然后修改键的值，最后再转化NSData并替换。</p>
+<h1 id="方法一使用nsstring替换">方法一：使用NSString替换</h1>
+<p>对应的主要OC代码如下：</p>
+<pre><code>NSString *str =@&quot;{\&quot;uid\&quot;: \&quot;b07b6ee3a93a44ae8d3cf80a3c6f47f5\&quot;, \&quot;userID\&quot;: \&quot;502456\&quot;, \&quot;isVip\&quot;: 0, \&quot;member_type\&quot;: 0, \&quot;member_title\&quot;: \&quot;\\u57fa\\u7840\\u7248\&quot;, \&quot;expire_on\&quot;: \&quot;\\u6682\\u672a\\u5f00\\u901aVIP\&quot;, \&quot;auth_quantity\&quot;: 0, \&quot;auth_mail\&quot;: null, \&quot;is_primary\&quot;: 0, \&quot;trail_status\&quot;: 0, \&quot;function_list\&quot;: [1], \&quot;timestamp\&quot;: 1666080682, \&quot;ts\&quot;: 0}&quot;;
+NSData* data =[str dataUsingEncoding:NSUTF8StringEncoding];//NSString转换为NSData
+NSString*oldString =[[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];//NSData转换为NSString
+NSString* newString =[str stringByReplacingOccurrencesOfString:@&quot;\&quot;isVip\&quot;: 0&quot; withString:@&quot;\&quot;isVip\&quot;: 1&quot;];//替换字符串
+NSLog(@&quot;旧字符串是:\n%@&quot;,oldString);
+NSLog(@&quot;新字符串是:\n%@&quot;,newString);
+</code></pre>
+<p>这里为了使用NSData数据，采用的是NSString转换而来的，当然也可以采用byte来生成。主要代码：</p>
+<pre><code>Byte byte[] = {0x7B,..., 0x7D};
+NSData *byteData = [[NSData alloc] initWithBytes:byte length:sizeof(byte)/sizeof(Byte)];
+</code></pre>
+<p>OC代码执行的结果如下：<br>
+<img src="https://mezdosec.github.io/post-images/1724728421127.png" alt="" loading="lazy"><br>
+可以成功替换，翻译成frida的js实现如下：</p>
+<pre><code> onLeave(log, retval, state) {
+    var ret = ObjC.Object(retval);
+    var oldNSStr = ObjC.classes.NSString.alloc().initWithData_encoding_(ret, 4);//NSData转换为NSString
+    log(`www.apibug.com旧--&gt;`+ oldNSStr);
+    var newNSStr = oldNSStr.stringByReplacingOccurrencesOfString_withString_('&quot;isVip&quot;: 0','&quot;isVip&quot;: 1');//替换字符串
+    log(`www.apibug.com新--&gt;`+ newNSStr);
+    retval.replace(newNSStr.dataUsingEncoding_(4));//NSString转换为NSData，并替换返回值
+  }
+</code></pre>
+<p>执行结果(同时查看我的账号界面可以看到PRO标志)：<br>
+<img src="https://mezdosec.github.io/post-images/1724728462699.png" alt="" loading="lazy"><br>
+但是点击解密HTTPS流量、重写等功能还是跳转到会员开通界面，这是因为这些功能是从function_list中获取的，所以想要解锁功能还需修改这里。主要代码：</p>
+<pre><code>              var newNSStr = oldNSStr
+.stringByReplacingOccurrencesOfString_withString_('&quot;isVip&quot;: 0','&quot;isVip&quot;: 1')
+.stringByReplacingOccurrencesOfString_withString_('&quot;is_vip&quot;: 0','&quot;is_vip&quot;: 1')
+.stringByReplacingOccurrencesOfString_withString_('&quot;member_type&quot;: 0','&quot;member_type&quot;: 3')
+.stringByReplacingOccurrencesOfString_withString_('\\u57fa\\u7840\\u7248','无敌牛逼版')
+.stringByReplacingOccurrencesOfString_withString_('&quot;can_deauthorize&quot;: false','&quot;can_deauthorize&quot;: true')
+.stringByReplacingOccurrencesOfString_withString_('&quot;auth_quantity&quot;: 0','&quot;auth_quantity&quot;: 99')
+.stringByReplacingOccurrencesOfString_withString_('&quot;auth_mail&quot;: null','&quot;auth_mail&quot;: &quot;apibug6@gmail.com&quot;')
+.stringByReplacingOccurrencesOfString_withString_('&quot;function_list&quot;: [1]','&quot;function_list&quot;: [1,2,3,4,5]')
+.stringByReplacingOccurrencesOfString_withString_('&quot;function_list&quot;: &quot;[1]&quot;','&quot;function_list&quot;: &quot;[1,2,3,4,5]&quot;')
+.stringByReplacingOccurrencesOfString_withString_('&quot;trail_status&quot;: 0','&quot;trail_status&quot;: 1')
+.stringByReplacingOccurrencesOfString_withString_('&quot;ts&quot;: 0','&quot;ts&quot;: 1')
+.stringByReplacingOccurrencesOfString_withString_('\\u6682\\u672a\\u5f00\\u901aVIP','无敌破解永久有效');
+</code></pre>
+<p>再次执行:<br>
+<img src="https://mezdosec.github.io/post-images/1724728505721.png" alt="" loading="lazy"><br>
+看到用户界面也成功变化了,高级功能也全部可以使用<br>
+<img src="https://mezdosec.github.io/post-images/1724728524369.png" alt="" loading="lazy"></p>
+<h1 id="方法二使用nsmutabledictionary修改">. 方法二：使用NSMutableDictionary修改</h1>
+<p>对应的主要OC代码如下：</p>
+<pre><code> NSData * data =[str dataUsingEncoding:NSUTF8StringEncoding];
+NSMutableDictionary* result =[NSJSONSerializationJSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];//NSData转NSMutableDictionary
+[result setValue:[NSNumber numberWithInt:1] forKey:@&quot;isVip&quot;];//设置isVip为1
+[result setValue:@&quot;apibug6@gmail.com&quot; forKey:@&quot;auth_mail&quot;];//这个无所谓
+[result setValue:@&quot;[1,2,3,4,5]&quot; forKey:@&quot;function_list&quot;];//设置function_list
+[result setValue:@&quot;2099-09-09 14:22&quot; forKey:@&quot;expire_on&quot;];//设置expire_on
+NSLog(@&quot;旧:%@&quot;,str);
+NSLog(@&quot;改变之后:%@&quot;,result);
+</code></pre>
+<p>执行的结果<br>
+<img src="https://mezdosec.github.io/post-images/1724728574181.png" alt="" loading="lazy"><br>
+这里翻译成frida的js实现时，有一个问题，</p>
+<p>生成NSMutableDictionary时，由于需要传入nil，而frida中无法生成，导致这种方法不能使用。</p>
+<p>根据GPT给出的方法var nil=ObjC.Object(ptr(&quot;0x0&quot;));，测试代码如下：</p>
+<pre><code>var data = ObjC.classes.NSString.stringWithString_('{&quot;aa&quot;:11,&quot;bb&quot;:2}') ;
+var NSJSONSerialization = ObjC.classes.NSJSONSerialization;
+var nil=ObjC.Object(ptr(&quot;0x0&quot;));
+NSJSONSerialization.JSONObjectWithData_options_error_(data,1,nil);
+</code></pre>
+<p>运行后直接崩溃，导致无法使用，因此在frida下，暂时放弃第二种方法。</p>
+<p>分析的话到这里就结束了，但借助frida来获取高级版，不方便使用，而且无法在非越狱手机上使用，如果想在非越狱手机上使用的话，就需要编写插件来运行在非越狱手机上。</p>
+<h1 id="0x02-编写非越狱插件">0x02 编写非越狱插件</h1>
+<p>编写插件采用了非越狱插件开发集成神器MonkeyDev，已经在论坛内发布过了,不会安装直接搜索MonkeyDev即可,MonkeyDev集成了theos+Tweaks+Reveal.framework +Cycript +class-dump+CaptainHook。</p>
+<p>安装完成后新建MonkeyAppFile-&gt;New-&gt;Project-&gt;MonkeyApp<br>
+项目建立后将砸壳后的APP拖入到TargetApp目录下。</p>
+<p>这里使用Logos进行Hook代码，HOOK 某个类里面的某个对象方法语法：</p>
+<pre><code>%hook 类名
+- (返回值)方法名:(id)arg1 ....
+{
+       ...
+}
+%end
+</code></pre>
+<p>根据上面的分析，这里我们需要对XMXXTEA类的方法decryptBase64String:stringKey:进行HOOK，修改返回值，完整代码如下：</p>
+<pre><code>%hook XMXXTEA
++(id)decryptBase64String:(NSString*)stringData stringKey:(NSString*)key {
+NSData*data =%orig;
+NSMutableDictionary*result =[NSJSONSerializationJSONObjectWithData:modifiedData options:NSJSONReadingMutableContainers error:&amp;error];
+if(error){
+NSLog(@&quot;解析JSON出错: %@&quot;, error);
+return modifiedData;//返回原始数据以防JSON解析失败
+}
+[result setValue:[NSNumber numberWithInt:1] forKey:@&quot;isVip&quot;];
+[result setValue:[NSNumber numberWithInt:1] forKey:@&quot;is_vip&quot;];
+[result setValue:[NSNumber numberWithInt:3] forKey:@&quot;member_type&quot;];
+[result setValue:[NSNumber numberWithInt:99] forKey:@&quot;auth_quantity&quot;];
+//[result setValue:@&quot;[1,2,3,4,5]&quot; forKey:@&quot;function_list&quot;];
+[result setValue:@&quot;无敌破解永久有效&quot; forKey:@&quot;expire_on&quot;];
+[result setValue:@&quot;无敌牛逼版&quot; forKey:@&quot;member_title&quot;];
+[result setValue:@&quot;apibug6@gmail.com&quot; forKey:@&quot;auth_mail&quot;];
+[result setValue:[NSNumber numberWithBool:YES] forKey:@&quot;can_deauthorize&quot;];
+[result setValue:[NSNumber numberWithInt:1] forKey:@&quot;trail_status&quot;];
+[result setValue:[NSNumber numberWithInt:1] forKey:@&quot;ts&quot;];
+
+//处理&quot;function_list&quot;字段
+id functionList =[result objectForKey:@&quot;function_list&quot;];
+if([functionList isKindOfClass:[NSArray class]]){
+//如果 function_list 是数组，则直接修改
+[result setValue:@[@1,@2,@3,@4,@5] forKey:@&quot;function_list&quot;];
+}elseif([functionList isKindOfClass:[NSString class]]){
+//如果 function_list 是字符串，则处理字符串值
+NSString*functionListStr =(NSString*)functionList;
+if([functionListStr isEqualToString:@&quot;[1]&quot;]){
+[result setValue:@&quot;[1,2,3,4,5]&quot; forKey:@&quot;function_list&quot;];
+}elseif([functionListStr isEqualToString:@&quot;\&quot;[1]\&quot;&quot;]){
+[result setValue:@&quot;[1,2,3,4,5]&quot; forKey:@&quot;function_list&quot;];
+}
+}
+NSData*data_result=[NSJSONSerialization dataWithJSONObject:result options:NSJSONWritingPrettyPrinted error:nil];
+NSLog(@&quot;www.apibug.com : %@&quot;, data_result);
+return data_result;
+}
+%end
+</code></pre>
+<p>因为开启抓包需要开通网络访问权限以及VPN的相关权限，由于账号不是苹果开发者账号，因此这些权限无法使用,所以需要Trollstore安装才有效果,ok,教程到此结束</p>
+<p>原文链接<br>
+https://www.t00ls.com/articles-72262.html</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/yi-ci-dui-app-shi-yong-socket-tong-xin-de-shen-tou-si-lu-ji-lu/">
+                  <h3 class="post-title">
+                    一次对app使用socket通信的渗透思路记录
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

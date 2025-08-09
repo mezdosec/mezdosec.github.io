@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>iOS逆向之frida检测绕过 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="以下文章来源于微信  闻鸡习武 ，作者吾奶习武之人
+
+在做iOS APP渗透时，越狱设备启动APP闪退，尝试使用多个越狱检测屏蔽插件无效后，有可能是因为APP启动时检测了frida，因此可查看设备是否安装了frida，如果安装了可尝试卸载后..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">iOS逆向之frida检测绕过</h2>
+            <div class="post-date">2024-07-31</div>
+            
+            <div class="post-content" v-pre>
+              <p>以下文章来源于微信  闻鸡习武 ，作者吾奶习武之人</p>
+<!-- more -->
+<p>在做iOS APP渗透时，越狱设备启动APP闪退，尝试使用多个越狱检测屏蔽插件无效后，有可能是因为APP启动时检测了frida，因此可查看设备是否安装了frida，如果安装了可尝试卸载后再运行APP看是否能正常启动运行。</p>
+<h1 id="frida环境配置">frida环境配置</h1>
+<p>PC配置frida环境省略，接下来主要看看在iOS设备上安装frida server的2种方式</p>
+<h1 id="fridaserver默认版本安装">fridaserver默认版本安装</h1>
+<ol>
+<li>
+<p>添加frida官方源</p>
+<p>frida源：https://build.frida.re<br>
+<img src="https://mezdosec.github.io/post-images/1722387976925.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>搜索frida进行安装<br>
+<img src="https://mezdosec.github.io/post-images/1722387985099.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1722387995758.png" alt="" loading="lazy"></p>
+</li>
+<li>
+<p>验证安装结果</p>
+</li>
+</ol>
+<p>通过frida-ps命令能看到iOS系统安装的应用，说明环境正常（PC frida版本要和手机的fridaserver版本一致）<br>
+<img src="https://mezdosec.github.io/post-images/1722388009259.png" alt="" loading="lazy"></p>
+<h1 id="fridaserver指定版本安装">fridaserver指定版本安装</h1>
+<ol>
+<li>下载指定版本server<br>
+进入github frida的releases页面，在目标版本的frida页面下载以下文件，如15.2.2版本（根据实际情况选择和自己pc对应的版本）</li>
+</ol>
+<p>frida_15.2.2_iphoneos-arm.deb[1]<br>
+<img src="https://mezdosec.github.io/post-images/1722388018274.png" alt="" loading="lazy"><br>
+2. 安装指定版本server<br>
+将下载的deb文件通过爱思助手拖进越狱文件系统根目录<br>
+<img src="https://mezdosec.github.io/post-images/1722388033011.png" alt="" loading="lazy"><br>
+连接设备ssh，切换到手机文件系统根目录，执行dpkg -i   xxx.deb，安装server<br>
+<img src="https://mezdosec.github.io/post-images/1722388038729.png" alt="" loading="lazy"><br>
+3. 验证安装结果<br>
+通过frida-ps命令能看到iOS系统安装的应用，说明环境正常（PC frida版本要和手机的fridaserver版本一致）<br>
+<img src="https://mezdosec.github.io/post-images/1722388044454.png" alt="" loading="lazy"></p>
+<h1 id="frida检测绕过">frida检测绕过</h1>
+<p>提取frida文件<br>
+利用前面提到的fridaserver安装方式安装好fridaserver后，可在cydia中查看相关文件的安装路径</p>
+<pre><code>/usr/lib/frida/frida-agent.dylib
+
+/usr/sbin/frida-server
+</code></pre>
+<p><img src="https://mezdosec.github.io/post-images/1722388061286.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1722388067729.png" alt="" loading="lazy"><br>
+将以上两个文件拷贝出来保存</p>
+<h1 id="卸载fridaserver">卸载fridaserver</h1>
+<p>将上一步frida安装成功后生成的文件拷贝后，在Cydia中去卸载frida<br>
+<img src="https://mezdosec.github.io/post-images/1722387955567.png" alt="" loading="lazy"></p>
+<h1 id="恢复fridaserver">恢复fridaserver</h1>
+<p>在/usr/lib/目录下新建一个frida文件夹，并将之前拷贝的两个文件放入frida文件夹中<br>
+<img src="https://mezdosec.github.io/post-images/1722387951500.png" alt="" loading="lazy"></p>
+<h1 id="运行fridaserver">运行fridaserver</h1>
+<p>通过上面方式恢复fridaserver文件后，就需要进入手机shell，手动运行fridaserver</p>
+<ol>
+<li>ssh连接手机shell<br>
+<img src="https://mezdosec.github.io/post-images/1722387935497.png" alt="" loading="lazy"></li>
+<li>启动fridaserver<br>
+<img src="https://mezdosec.github.io/post-images/1722387931142.png" alt="" loading="lazy"></li>
+<li>验证安装结果<br>
+通过frida-ps命令能看到iOS系统安装的应用，说明环境正常（PC frida版本要和手机的fridaserver版本一致）<br>
+<img src="https://mezdosec.github.io/post-images/1722387925696.png" alt="" loading="lazy"></li>
+</ol>
+<h1 id="frida检测绕过效果">frida检测绕过效果</h1>
+<p>绕过之前APP提示“设备存在风险”后退出<br>
+<img src="https://mezdosec.github.io/post-images/1722387919298.png" alt="" loading="lazy"><br>
+接下来尝试使用frida对目标APP进行hook的时候，如果APP还是提示设备存在风险，就先启动APP，APP正常打开后，再使用attact模式对APP进行hook<br>
+<img src="https://mezdosec.github.io/post-images/1722387912657.png" alt="" loading="lazy"></p>
+<p>hook iOS  APP cccrypt 加密库效果如下：<br>
+<img src="https://mezdosec.github.io/post-images/1722387907216.png" alt="" loading="lazy"><br>
+脚本注入成功后，可看到APP调用算法过程当中的一些关键信息被输出，至此绕过frida 检测进行hook。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/ios-yue-yu-shi-bai-jie-jue-ban-fa/">
+                  <h3 class="post-title">
+                    ios越狱失败解决办法
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>

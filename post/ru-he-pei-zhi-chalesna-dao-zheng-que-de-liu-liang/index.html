@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>如何配置chales，拿到正确的流量 | 小呆博客</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
+<link rel="shortcut icon" href="https://mezdosec.github.io/favicon.ico?v=1754753265455">
+<link rel="stylesheet" href="https://mezdosec.github.io/styles/main.css">
+
+
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="本文解决app走的socket协议进行的请求，并没有识别到http或https请求的问题
+
+app走的socket协议进行的请求，并没有识别到http或https请求
+
+同时发现流量端口为
+18081
+19000
+**最终的流量的解密和流量..." />
+    <meta name="keywords" content="chales抓包" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://mezdosec.github.io">
+        <img src="https://mezdosec.github.io/images/avatar.png?v=1754753265455" class="site-logo">
+        <h1 class="site-title">小呆博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+        
+          <a href="/post/address" class="site-nav">
+            友链
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      
+    </div>
+    <div class="site-footer">
+       | <a class="rss" href="https://mezdosec.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">如何配置chales，拿到正确的流量</h2>
+            <div class="post-date">2023-06-21</div>
+            
+            <div class="post-content" v-pre>
+              <p>本文解决app走的socket协议进行的请求，并没有识别到http或https请求的问题</p>
+<!-- more -->
+<p>app走的socket协议进行的请求，并没有识别到http或https请求<br>
+<img src="https://mezdosec.github.io/post-images/1687350630250.png" alt="" loading="lazy"><br>
+同时发现流量端口为<br>
+18081<br>
+19000</p>
+<p>**最终的流量的解密和流量的捕获需要如下步骤进行配置<br>
+<img src="https://mezdosec.github.io/post-images/1687350666709.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687350674198.png" alt="" loading="lazy"><br>
+首先，这个18081之前没有设置时候，发现他是一个https流量<br>
+然后我们添加18081，添加后点ok<br>
+<img src="https://mezdosec.github.io/post-images/1687350696590.png" alt="" loading="lazy"><br>
+然后下一步要改的地方为：<br>
+<img src="https://mezdosec.github.io/post-images/1687350709295.png" alt="" loading="lazy"><br>
+我们使用vpn抓包的，就是设置一个传输层的一个代理<br>
+<img src="https://mezdosec.github.io/post-images/1687350726750.png" alt="" loading="lazy"><br>
+<img src="https://mezdosec.github.io/post-images/1687350740790.png" alt="" loading="lazy"><br>
+那他呢就会去正确的识别上一层 应用的http的协议<br>
+包括这个80，443<br>
+如果是默认的话话，就会自动识别掉，不是默认的话<br>
+<img src="https://mezdosec.github.io/post-images/1687350763465.png" alt="" loading="lazy"><br>
+进行一个配置，<br>
+配置完成后,重新抓包<br>
+列表页已经可以看到正常抓取识别流量了<br>
+，内容也正常解析出来了，图片也正常加载了。<br>
+<img src="https://mezdosec.github.io/post-images/1687350797781.png" alt="" loading="lazy"></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://mezdosec.github.io/dilCxgAnS/" class="tag">
+                    chales抓包
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://mezdosec.github.io/post/chales-pei-zhi-ssl-dai-li-huo-qu-https-de-liu-liang/">
+                  <h3 class="post-title">
+                    chales配置ssl代理获取https的流量
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.min.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
